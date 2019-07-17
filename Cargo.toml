@@ -1,0 +1,9 @@
+[package]
+name = "femme"
+version = "0.1.0"
+authors = ["lrlna <shestak.irina@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+log = "0.4.7"
+async-log = "1.1.0"
