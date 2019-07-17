@@ -1,4 +1,5 @@
-use log::{LevelFilter, Log, Metadata, Record};
+use console::style;
+use log::{Level, LevelFilter, Log, Metadata, Record};
 
 #[derive(Debug)]
 pub struct Logger {}
@@ -32,5 +33,14 @@ impl Log for Logger {
 }
 
 fn pretty_print(record: &Record<'_>) {
-    println!("{} - {}", record.level(), record.args());
+    let symbol = get_level_symbol(record.level());
+    println!("{} - {}", symbol, record.args());
+}
+
+fn get_level_symbol(level: Level) -> String {
+    use Level::*;
+    match level {
+        Info => format!("{}", style("*").cyan()),
+        _ => format!("{}", style("=").red()),
+    }
 }
