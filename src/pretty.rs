@@ -1,3 +1,5 @@
+//! Pretty print logs.
+
 use console::style;
 use log::{Level, LevelFilter, Log, Metadata, Record};
 

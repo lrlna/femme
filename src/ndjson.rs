@@ -1,3 +1,5 @@
+//! Print logs as ndjson.
+
 use log::{LevelFilter, Log, Metadata, Record};
 use serde_json::Value;
 use std::collections::HashMap;
