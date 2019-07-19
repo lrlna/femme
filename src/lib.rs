@@ -33,46 +33,39 @@ impl Log for Logger {
 }
 
 fn pretty_print(record: &Record<'_>) {
-    let symbol = get_level_symbol(record.level());
-    let message = colourize(
-        record.level(),
-        format!("{}  {}", symbol, style(record.args()).underlined()),
+    println!(
+        "{}{}{}",
+        format_message(&record),
+        format_line(&record),
+        format_key_val("d128", "0E+3")
     );
-    println!("{}", message);
-    println!("   {}", format_line(&record));
-    println!("{}", format_key_val("d128", "0E+3"));
-    println!("{}", format_key_val("HTTPMeth", "GET"));
-    println!("{}", format_key_val("Status", "200"));
-    println!();
 }
 
 fn format_key_val(key: &str, val: &str) -> String {
-    format!("   › {}: {}", style(key).magenta(), val)
+    format!("   › {}: {}\n", style(key).magenta(), val)
 }
 
 fn format_line(record: &Record<'_>) -> String {
     match (record.file(), record.line()) {
-        (Some(file), Some(line)) => format!("{}:{}", file, line),
+        (Some(file), Some(line)) => format!("   {}:{}\n", file, line),
         _ => String::new(),
     }
 }
 
-fn colourize(level: Level, print: String) -> String {
+fn format_message(record: &Record<'_>) -> String {
     use Level::*;
-    match level {
-        Trace | Debug | Info => format!("{}", style(print).green()),
-        Warn => format!("{}", style(print).yellow()),
-        Error => format!("{}", style(print).red()),
-    }
-}
-
-fn get_level_symbol(level: Level) -> String {
-    use Level::*;
-    match level {
+    let symbol = match record.level() {
         Trace => format!("{}", "◯"),
         Debug => format!("{}", "◎"),
         Info => format!("{}", "●"),
         Warn => format!("{}", "⌿"),
         Error => format!("{}", "✖"),
+    };
+
+    let msg = format!("{}  {}\n", symbol, style(record.args()).underlined());
+    match record.level() {
+        Trace | Debug | Info => format!("{}", style(msg).green()),
+        Warn => format!("{}", style(msg).yellow()),
+        Error => format!("{}", style(msg).red()),
     }
 }
