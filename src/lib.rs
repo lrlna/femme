@@ -34,13 +34,36 @@ impl Log for Logger {
 
 fn pretty_print(record: &Record<'_>) {
     let symbol = get_level_symbol(record.level());
-    println!("{} - {}", symbol, record.args());
+    let message = colourize(record.level(), format!("{}  {}", symbol, record.args()));
+    println!("{}", message);
+    println!("{}", print_line(&record));
+}
+
+fn print_line(record: &Record<'_>) -> String {
+    match (record.file(), record.line()) {
+        (Some(file), Some(line)) => format!("   › {}:{}", file, line),
+        _ => String::new(),
+    }
+}
+
+fn colourize(level: Level, print: String) -> String {
+    use Level::*;
+    match level {
+        Trace => format!("{}", print),
+        Debug => format!("{}", style(print).cyan()),
+        Info => format!("{}", print),
+        Warn => format!("{}", style(print).yellow()),
+        Error => format!("{}", style(print).red()),
+    }
 }
 
 fn get_level_symbol(level: Level) -> String {
     use Level::*;
     match level {
-        Info => format!("{}", style("*").cyan()),
-        _ => format!("{}", style("=").red()),
+        Trace => format!("{}", "◯"),
+        Debug => format!("{}", "◎"),
+        Info => format!("{}", "●"),
+        Warn => format!("{}", "⌿"),
+        Error => format!("{}", "✖"),
     }
 }
