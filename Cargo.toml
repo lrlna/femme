@@ -5,6 +5,6 @@ authors = ["lrlna <shestak.irina@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-log = "0.4.7"
+log = { version = "0.4.7", features = ["kv_unstable"] }
 async-log = "1.1.0"
 console = "0.7.7"

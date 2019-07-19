@@ -34,14 +34,25 @@ impl Log for Logger {
 
 fn pretty_print(record: &Record<'_>) {
     let symbol = get_level_symbol(record.level());
-    let message = colourize(record.level(), format!("{}  {}", symbol, record.args()));
+    let message = colourize(
+        record.level(),
+        format!("{}  {}", symbol, style(record.args()).underlined()),
+    );
     println!("{}", message);
-    println!("{}", print_line(&record));
+    println!("   {}", format_line(&record));
+    println!("{}", format_key_val("d128", "0E+3"));
+    println!("{}", format_key_val("HTTPMeth", "GET"));
+    println!("{}", format_key_val("Status", "200"));
+    println!();
 }
 
-fn print_line(record: &Record<'_>) -> String {
+fn format_key_val(key: &str, val: &str) -> String {
+    format!("   › {}: {}", style(key).magenta(), val)
+}
+
+fn format_line(record: &Record<'_>) -> String {
     match (record.file(), record.line()) {
-        (Some(file), Some(line)) => format!("   › {}:{}", file, line),
+        (Some(file), Some(line)) => format!("{}:{}", file, line),
         _ => String::new(),
     }
 }
@@ -49,9 +60,7 @@ fn print_line(record: &Record<'_>) -> String {
 fn colourize(level: Level, print: String) -> String {
     use Level::*;
     match level {
-        Trace => format!("{}", print),
-        Debug => format!("{}", style(print).cyan()),
-        Info => format!("{}", print),
+        Trace | Debug | Info => format!("{}", style(print).green()),
         Warn => format!("{}", style(print).yellow()),
         Error => format!("{}", style(print).red()),
     }
