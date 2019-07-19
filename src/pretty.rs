@@ -1,7 +1,7 @@
 //! Pretty print logs.
 
 use console::style;
-use log::{Level, LevelFilter, Log, Metadata, Record};
+use log::{kv, Level, LevelFilter, Log, Metadata, Record};
 
 #[derive(Debug)]
 pub struct Logger {}
@@ -34,14 +34,37 @@ impl Log for Logger {
     fn flush(&self) {}
 }
 
-// TODO: use format_key_val to pretty print kv's from log crate
 fn pretty_print(record: &Record<'_>) {
-    println!("{}{}", format_message(&record), format_line(&record));
+    println!(
+        "{}{}{}",
+        format_message(&record),
+        format_line(&record),
+        format_kv_pairs(&record),
+    );
 }
 
-// TODO: use with key values that could eventually be put through log macros
-fn _format_key_val(key: &str, val: &str) -> String {
-    format!("   › {}: {}\n", style(key).magenta(), val)
+fn format_kv_pairs(record: &Record) -> String {
+    struct Visitor {
+        string: String,
+    }
+
+    impl<'kvs> kv::Visitor<'kvs> for Visitor {
+        fn visit_pair(
+            &mut self,
+            key: kv::Key<'kvs>,
+            val: kv::Value<'kvs>,
+        ) -> Result<(), kv::Error> {
+            let string = &format!("   › {}: {}\n", style(key).magenta(), val);
+            self.string.push_str(string);
+            Ok(())
+        }
+    }
+
+    let mut visitor = Visitor {
+        string: String::new(),
+    };
+    record.key_values().visit(&mut visitor).unwrap();
+    visitor.string
 }
 
 fn format_line(record: &Record<'_>) -> String {
