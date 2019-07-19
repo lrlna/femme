@@ -1,5 +1,5 @@
 fn main() {
-    femme::Logger::new().start(log::LevelFilter::Trace).unwrap();
+    femme::ndjson::Logger::new().start(log::LevelFilter::Trace).unwrap();
     log::error!("Buffer has to be 16 bytes in length");
     log::warn!("Unauthorized access attempt on /login");
     log::info!("Listening on port 8080");
