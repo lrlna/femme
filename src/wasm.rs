@@ -28,13 +28,21 @@ impl Log for Logger {
 
     fn log(&self, record: &Record<'_>) {
          if self.enabled(record.metadata()) {
-             let string = record.args().to_string();
+             let string = format!("{} {}", record.args(), format_line(&record));
              match record.level() {
                  Level::Error => web_sys::console::error_1(&string.into()),
                  Level::Warn => web_sys::console::warn_1(&string.into()),
+                 Level::Info => web_sys::console::debug_1(&string.into()),
                  _ => web_sys::console::log_1(&string.into()),
              }
         }
     }
     fn flush(&self) {}
+}
+
+fn format_line(record: &Record<'_>) -> String {
+    match (record.file(), record.line()) {
+        (Some(file), Some(line)) => format!("({}:{})", file, line),
+        _ => String::new(),
+    }
 }
