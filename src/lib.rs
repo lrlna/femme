@@ -8,22 +8,43 @@
 //! log::warn!("Unauthorized access attempt on /login");
 //! log::info!("Listening on port 8080");
 //! ```
+
+#[cfg(not(target_arch = "wasm32"))]
 pub mod ndjson;
+
+#[cfg(not(target_arch = "wasm32"))]
 pub mod pretty;
 
-/// Starts logging depending on current environment. If in production, will print
-/// ndjson, otherwise pretty-prints.
+#[cfg(target_arch = "wasm32")]
+pub mod wasm;
+
+/// Starts logging depending on current environment.
+///
+/// # Log output
+///
+/// - when compiling with `--release` uses ndjson.
+/// - pretty-prints otherwise.
+/// - works in WASM out of the box.
 ///
 /// # Examples
+///
 /// ```
 /// femme::start(log::LevelFilter::Trace).unwrap();
 /// log::warn!("Unauthorized access attempt on /login");
 /// log::info!("Listening on port 8080");
 /// ```
 pub fn start(filter: log::LevelFilter) -> Result<(), log::SetLoggerError> {
-    if cfg!(debug_assertions) {
-        pretty::Logger::new().start(filter)
-    } else {
-        ndjson::Logger::new().start(filter)
+    #[cfg(target_arch = "wasm32")]
+    wasm::Logger::new().start(filter)?;
+
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        if cfg!(debug_assertions) {
+            pretty::Logger::new().start(filter)?;
+        } else {
+            ndjson::Logger::new().start(filter)?;
+        }
     }
+
+    Ok(())
 }
