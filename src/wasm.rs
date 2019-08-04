@@ -39,14 +39,14 @@ impl Log for Logger {
                 Some(obj) => match record.level() {
                     Level::Error => web_sys::console::error_3(&args, &obj, &line),
                     Level::Warn => web_sys::console::warn_3(&args, &obj, &line),
-                    Level::Info => web_sys::console::debug_3(&args, &obj, &line),
-                    _ => web_sys::console::log_3(&args, &obj, &line),
+                    Level::Info => web_sys::console::log_3(&args, &obj, &line),
+                    _ => web_sys::console::debug_3(&args, &obj, &line),
                 },
                 None => match record.level() {
                     Level::Error => web_sys::console::error_2(&args, &line),
                     Level::Warn => web_sys::console::warn_2(&args, &line),
-                    Level::Info => web_sys::console::debug_2(&args, &line),
-                    _ => web_sys::console::log_2(&args, &line),
+                    Level::Info => web_sys::console::log_2(&args, &line),
+                    _ => web_sys::console::debug_2(&args, &line),
                 },
             }
         }
