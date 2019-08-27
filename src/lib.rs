@@ -15,6 +15,9 @@ pub mod ndjson;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod pretty;
 
+#[cfg(not(target_arch = "wasm32"))]
+pub mod clean;
+
 #[cfg(target_arch = "wasm32")]
 pub mod wasm;
 
