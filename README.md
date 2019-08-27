@@ -20,7 +20,7 @@ log::info!("Listening on port 8080");
 ### Pretty Output
 <img src="pretty.png" height=500 alt="pretty printed logs"/>
 
-### Newline Delimited JSON 
+### Newline Delimited JSON
 <img src="ndjson.png" width=590 alt="ndjson"/>
 
 
