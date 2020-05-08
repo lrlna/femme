@@ -1,8 +1,7 @@
 use kv_log_macro as log;
+
 fn main() {
-    femme::pretty::Logger::new()
-        .start(::log::LevelFilter::Trace)
-        .unwrap();
+    femme::with_filter(femme::LevelFilter::Trace, Some("log"));
     log::error!("Buffer has to be 16 bytes in length");
     log::warn!("Unauthorized access attempt", { route: "/login", user_id: "827756627", });
     log::info!("Server listening", { port: "8080" });
