@@ -49,37 +49,15 @@ pub fn start() {
 /// ```
 pub fn with_level(level: log::LevelFilter) {
     #[cfg(target_arch = "wasm32")]
-    wasm::start(level, None);
+    wasm::start(level);
 
     #[cfg(not(target_arch = "wasm32"))]
     {
         // Use ndjson in release mode, pretty logging while debugging.
         if cfg!(debug_assertions) {
-            // pretty::start(level, None);
-            todo!();
+            pretty::start(level);
         } else {
-            ndjson::start(level, None);
-        }
-    }
-}
-
-/// Start logging with a log level and a filter.
-///
-/// If `None` is passed all messages are passed.
-pub fn with_filter<F>(level: log::LevelFilter, filter: Option<F>)
-where
-    F: Fn(&log::Record) -> bool + Send + Sync + 'static,
-{
-    #[cfg(target_arch = "wasm32")]
-    wasm::start(level, filter);
-
-    #[cfg(not(target_arch = "wasm32"))]
-    {
-        // Use ndjson in release mode, pretty logging while debugging.
-        if cfg!(debug_assertions) {
-            // pretty::start(level, filter);
-        } else {
-            ndjson::start(level, filter);
+            ndjson::start(level);
         }
     }
 }
