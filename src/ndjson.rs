@@ -5,8 +5,23 @@ use serde_json::Value;
 use std::collections::HashMap;
 use std::time;
 
+/// Start logging.
+pub(crate) fn start<F>(level: LevelFilter, filter: Option<F>)
+where
+    F: Fn(&Record) -> bool + Send + Sync + 'static,
+{
+    let logger = Box::new(Logger { filter });
+    log::set_boxed_logger(logger).expect("Could not start logging");
+    log::set_max_level(level);
+}
+
 #[derive(Debug)]
-pub struct Logger {}
+pub(crate) struct Logger<F>
+where
+    F: Fn(&log::Record) -> bool,
+{
+    filter: Option<F>,
+}
 
 #[derive(serde_derive::Serialize)]
 struct Msg {
@@ -17,43 +32,32 @@ struct Msg {
     key_values: Option<HashMap<String, Value>>,
 }
 
-impl Logger {
-    pub fn new() -> Self {
-        Self {}
-    }
-
-    /// Start logging.
-    pub fn start(self, filter: LevelFilter) -> Result<(), log::SetLoggerError> {
-        let res = log::set_boxed_logger(Box::new(self));
-        if res.is_ok() {
-            log::set_max_level(filter);
-        }
-        res
-    }
-}
-
-impl Log for Logger {
+impl<F> Log for Logger<F>
+where
+    F: Fn(&Record) -> bool + Send + 'static + Sync,
+{
     fn enabled(&self, metadata: &Metadata<'_>) -> bool {
         metadata.level() <= log::max_level()
     }
 
     fn log(&self, record: &Record<'_>) {
         if self.enabled(record.metadata()) {
-            print_ndjson(record)
+            if let Some(filter) = &self.filter {
+                if !filter(&record) {
+                    return;
+                }
+            }
+            // TODO: implement key_values mapping
+            let msg = Msg {
+                level: get_level(record.level()),
+                key_values: format_kv_pairs(&record),
+                time: time::UNIX_EPOCH.elapsed().unwrap().as_millis(),
+                msg: record.args().to_string(),
+            };
+            println!("{}", serde_json::to_string(&msg).unwrap())
         }
     }
     fn flush(&self) {}
-}
-
-// TODO: implement key_values mapping
-fn print_ndjson(record: &Record<'_>) {
-    let msg = Msg {
-        level: get_level(record.level()),
-        key_values: format_kv_pairs(&record),
-        time: time::UNIX_EPOCH.elapsed().unwrap().as_millis(),
-        msg: record.args().to_string(),
-    };
-    println!("{}", serde_json::to_string(&msg).unwrap())
 }
 
 fn get_level(level: log::Level) -> u8 {

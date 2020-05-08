@@ -4,22 +4,21 @@
 //!
 //! ## Examples
 //! ```
-//! femme::start(log::LevelFilter::Trace)?;
+//! femme::start();
 //! log::warn!("Unauthorized access attempt on /login");
 //! log::info!("Listening on port 8080");
 //! ```
 
-#[cfg(not(target_arch = "wasm32"))]
-pub mod ndjson;
+pub use log::LevelFilter;
 
 #[cfg(not(target_arch = "wasm32"))]
-pub mod pretty;
+mod ndjson;
 
 #[cfg(not(target_arch = "wasm32"))]
-pub mod clean;
+mod pretty;
 
 #[cfg(target_arch = "wasm32")]
-pub mod wasm;
+mod wasm;
 
 /// Starts logging depending on current environment.
 ///
@@ -32,22 +31,55 @@ pub mod wasm;
 /// # Examples
 ///
 /// ```
-/// femme::start(log::LevelFilter::Trace).unwrap();
+/// femme::start();
 /// log::warn!("Unauthorized access attempt on /login");
 /// log::info!("Listening on port 8080");
 /// ```
-pub fn start(filter: log::LevelFilter) -> Result<(), log::SetLoggerError> {
+pub fn start() {
+    with_level(LevelFilter::Info);
+}
+
+/// Start logging with a log level.
+///
+/// All messages under the specified log level will statically be filtered out.
+///
+/// # Examples
+/// ```
+/// femme::start(log::LevelFilter::Trace);
+/// ```
+pub fn with_level(level: log::LevelFilter) {
     #[cfg(target_arch = "wasm32")]
-    wasm::Logger::new().start(filter)?;
+    wasm::start(level, None);
 
     #[cfg(not(target_arch = "wasm32"))]
     {
+        // Use ndjson in release mode, pretty logging while debugging.
         if cfg!(debug_assertions) {
-            pretty::Logger::new().start(filter)?;
+            // pretty::start(level, None);
+            todo!();
         } else {
-            ndjson::Logger::new().start(filter)?;
+            ndjson::start(level, None);
         }
     }
+}
 
-    Ok(())
+/// Start logging with a log level and a filter.
+///
+/// If `None` is passed all messages are passed.
+pub fn with_filter<F>(level: log::LevelFilter, filter: Option<F>)
+where
+    F: Fn(&log::Record) -> bool + Send + Sync + 'static,
+{
+    #[cfg(target_arch = "wasm32")]
+    wasm::start(level, filter);
+
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        // Use ndjson in release mode, pretty logging while debugging.
+        if cfg!(debug_assertions) {
+            // pretty::start(level, filter);
+        } else {
+            ndjson::start(level, filter);
+        }
+    }
 }
