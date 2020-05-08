@@ -25,3 +25,6 @@ console = "0.7.7"
 web-sys = { version = "0.3.25", features = ["console"] }
 js-sys = "0.3.25"
 wasm-bindgen = { version = "0.2.48", features = ["serde-serialize"] }
+
+[dev-dependencies]
+kv-log-macro = "1.0.5"
