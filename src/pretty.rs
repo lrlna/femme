@@ -28,19 +28,15 @@ impl Log for Logger {
 
     fn log(&self, record: &Record<'_>) {
         if self.enabled(record.metadata()) {
-            pretty_print(record)
+            println!(
+                "{} {}{}",
+                format_src(&record),
+                &record.args(),
+                format_kv_pairs(&record),
+            );
         }
     }
     fn flush(&self) {}
-}
-
-fn pretty_print(record: &Record<'_>) {
-    println!(
-        "{}{}{}",
-        format_message(&record),
-        format_line(&record),
-        format_kv_pairs(&record),
-    );
 }
 
 fn format_kv_pairs(record: &Record) -> String {
@@ -54,7 +50,7 @@ fn format_kv_pairs(record: &Record) -> String {
             key: kv::Key<'kvs>,
             val: kv::Value<'kvs>,
         ) -> Result<(), kv::Error> {
-            let string = &format!("   › {}: {}\n", style(key).magenta(), val);
+            let string = &format!("\n    {} {}", style(key).bold(), val);
             self.string.push_str(string);
             Ok(())
         }
@@ -67,27 +63,11 @@ fn format_kv_pairs(record: &Record) -> String {
     visitor.string
 }
 
-fn format_line(record: &Record<'_>) -> String {
-    match (record.file(), record.line()) {
-        (Some(file), Some(line)) => format!("   {}:{}\n", file, line),
-        _ => String::new(),
-    }
-}
-
-fn format_message(record: &Record<'_>) -> String {
-    use Level::*;
-    let symbol = match record.level() {
-        Trace => format!("{}", "◯"),
-        Debug => format!("{}", "◎"),
-        Info => format!("{}", "●"),
-        Warn => format!("{}", "⌿"),
-        Error => format!("{}", "✖"),
-    };
-
-    let msg = format!("{}  {}\n", symbol, style(record.args()).underlined());
+fn format_src(record: &Record<'_>) -> String {
+    let msg = record.target();
     match record.level() {
-        Trace | Debug | Info => format!("{}", style(msg).green()),
-        Warn => format!("{}", style(msg).yellow()),
-        Error => format!("{}", style(msg).red()),
+        Level::Trace | Level::Debug | Level::Info => format!("{}", style(msg).green().bold()),
+        Level::Warn => format!("{}", style(msg).yellow().bold()),
+        Level::Error => format!("{}", style(msg).red().bold()),
     }
 }
