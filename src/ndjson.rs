@@ -6,22 +6,14 @@ use std::collections::HashMap;
 use std::time;
 
 /// Start logging.
-pub(crate) fn start<F>(level: LevelFilter, filter: Option<F>)
-where
-    F: Fn(&Record) -> bool + Send + Sync + 'static,
-{
-    let logger = Box::new(Logger { filter });
+pub(crate) fn start(level: LevelFilter) {
+    let logger = Box::new(Logger {});
     log::set_boxed_logger(logger).expect("Could not start logging");
     log::set_max_level(level);
 }
 
 #[derive(Debug)]
-pub(crate) struct Logger<F>
-where
-    F: Fn(&log::Record) -> bool,
-{
-    filter: Option<F>,
-}
+pub(crate) struct Logger {}
 
 #[derive(serde_derive::Serialize)]
 struct Msg {
@@ -32,21 +24,13 @@ struct Msg {
     key_values: Option<HashMap<String, Value>>,
 }
 
-impl<F> Log for Logger<F>
-where
-    F: Fn(&Record) -> bool + Send + 'static + Sync,
-{
+impl Log for Logger {
     fn enabled(&self, metadata: &Metadata<'_>) -> bool {
         metadata.level() <= log::max_level()
     }
 
     fn log(&self, record: &Record<'_>) {
         if self.enabled(record.metadata()) {
-            if let Some(filter) = &self.filter {
-                if !filter(&record) {
-                    return;
-                }
-            }
             // TODO: implement key_values mapping
             let msg = Msg {
                 level: get_level(record.level()),

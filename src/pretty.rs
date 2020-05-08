@@ -4,17 +4,14 @@ use console::style;
 use log::{kv, Level, LevelFilter, Log, Metadata, Record};
 
 /// Start logging.
-pub(crate) fn start(level: LevelFilter, filter: Option<&str>) {
-    let filter = filter.map(|s| s.to_owned());
-    let logger = Box::new(Logger { filter });
+pub(crate) fn start(level: LevelFilter) {
+    let logger = Box::new(Logger {});
     log::set_boxed_logger(logger).expect("Could not start logging");
     log::set_max_level(level);
 }
 
 #[derive(Debug)]
-pub(crate) struct Logger {
-    filter: Option<String>,
-}
+pub(crate) struct Logger {}
 
 impl Log for Logger {
     fn enabled(&self, metadata: &Metadata<'_>) -> bool {
@@ -23,11 +20,6 @@ impl Log for Logger {
 
     fn log(&self, record: &Record<'_>) {
         if self.enabled(record.metadata()) {
-            if let Some(filter) = &self.filter {
-                if !record.target().contains(filter) {
-                    return;
-                }
-            }
             println!(
                 "{} {}{}",
                 format_src(&record),

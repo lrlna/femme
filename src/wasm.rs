@@ -7,15 +7,14 @@ use wasm_bindgen::prelude::*;
 use std::collections::HashMap;
 
 /// Start logging.
-pub(crate) fn start(level: LevelFilter, filter: Option<&str>) {
+pub(crate) fn start<F>(level: LevelFilter) {
     let logger = Box::new(Logger {});
     log::set_boxed_logger(logger).expect("Could not start logging");
     log::set_max_level(level);
 }
 
-/// A WASM logger for the browser.
 #[derive(Debug)]
-struct Logger {}
+pub(crate) struct Logger {}
 
 impl Log for Logger {
     fn enabled(&self, metadata: &Metadata<'_>) -> bool {
