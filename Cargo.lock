@@ -140,7 +140,7 @@ dependencies = [
 
 [[package]]
 name = "femme"
-version = "2.0.0"
+version = "2.0.1"
 dependencies = [
  "async-log 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "cfg-if 0.1.9 (registry+https://github.com/rust-lang/crates.io-index)",
