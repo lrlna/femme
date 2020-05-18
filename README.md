@@ -12,7 +12,9 @@ A pretty-printer and [ndjson](http://ndjson.org/) logger for the [log](https://d
 
 ## Examples
 ```rust
-femme::start(log::LevelFilter::Trace)?;
+use kv_log_macro as log;
+
+femme::with_level(femme::LevelFilter::Trace);
 log::warn!("Unauthorized access attempt on /login");
 log::info!("Listening on port 8080");
 ```
