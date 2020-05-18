@@ -16,6 +16,13 @@ femme::start(log::LevelFilter::Trace)?;
 log::warn!("Unauthorized access attempt on /login");
 log::info!("Listening on port 8080");
 ```
+
+Prettified output will be displayed when debugging. In release mode, this logger
+will output to ndjson.
+
+When using Wasm with `#[cfg(target_arch = "wasm32")]`, Wasm logger will be used.
+Wasm logger uses `web_sys` crate to send `console.log()` to JavaScript.
+
 ## Screenshots
 ### Pretty Output
 <img src="pretty.png" height=500 alt="pretty printed logs"/>
