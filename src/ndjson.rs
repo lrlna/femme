@@ -3,6 +3,7 @@
 use log::{kv, LevelFilter, Log, Metadata, Record};
 use serde_json::Value;
 use std::collections::HashMap;
+use std::io;
 use std::time;
 
 /// Start logging.
@@ -38,7 +39,7 @@ impl Log for Logger {
                 time: time::UNIX_EPOCH.elapsed().unwrap().as_millis(),
                 msg: record.args().to_string(),
             };
-            println!("{}", serde_json::to_string(&msg).unwrap())
+            serde_json::to_writer(io::stdout(), &msg).unwrap();
         }
     }
     fn flush(&self) {}
