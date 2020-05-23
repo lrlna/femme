@@ -2,6 +2,8 @@
 
 use console::style;
 use log::{kv, Level, LevelFilter, Log, Metadata, Record};
+use std::fmt::Write;
+use std::io;
 
 /// Start logging.
 pub(crate) fn start(level: LevelFilter) {
@@ -19,47 +21,45 @@ impl Log for Logger {
     }
 
     fn log(&self, record: &Record<'_>) {
+        use io::Write;
         if self.enabled(record.metadata()) {
-            println!(
-                "{} {}{}",
-                format_src(&record),
-                &record.args(),
-                format_kv_pairs(&record),
-            );
+            let mut out = String::new();
+            format_src(&mut out, &record);
+            write!(out, " {}", &record.args()).unwrap();
+            format_kv_pairs(&mut out, &record);
+            writeln!(io::stdout(), "{}", out).unwrap();
         }
     }
     fn flush(&self) {}
 }
 
-fn format_kv_pairs(record: &Record) -> String {
-    struct Visitor {
-        string: String,
+fn format_kv_pairs(mut out: &mut String, record: &Record) {
+    struct Visitor<'a> {
+        string: &'a mut String,
     }
 
-    impl<'kvs> kv::Visitor<'kvs> for Visitor {
+    impl<'kvs, 'a> kv::Visitor<'kvs> for Visitor<'a> {
         fn visit_pair(
             &mut self,
             key: kv::Key<'kvs>,
             val: kv::Value<'kvs>,
         ) -> Result<(), kv::Error> {
-            let string = &format!("\n    {} {}", style(key).bold(), val);
-            self.string.push_str(string);
+            write!(self.string, "\n    {} {}", style(key).bold(), val).unwrap();
             Ok(())
         }
     }
 
-    let mut visitor = Visitor {
-        string: String::new(),
-    };
+    let mut visitor = Visitor { string: &mut out };
     record.key_values().visit(&mut visitor).unwrap();
-    visitor.string
 }
 
-fn format_src(record: &Record<'_>) -> String {
+fn format_src(out: &mut String, record: &Record<'_>) {
     let msg = record.target();
     match record.level() {
-        Level::Trace | Level::Debug | Level::Info => format!("{}", style(msg).green().bold()),
-        Level::Warn => format!("{}", style(msg).yellow().bold()),
-        Level::Error => format!("{}", style(msg).red().bold()),
+        Level::Trace | Level::Debug | Level::Info => {
+            write!(out, "{}", style(msg).green().bold()).unwrap()
+        }
+        Level::Warn => write!(out, "{}", style(msg).yellow().bold()).unwrap(),
+        Level::Error => write!(out, "{}", style(msg).red().bold()).unwrap(),
     }
 }
