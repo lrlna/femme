@@ -1,8 +1,14 @@
 //! Pretty print logs.
 
-use console::style;
 use log::{kv, Level, LevelFilter, Log, Metadata, Record};
 use std::io::{self, StdoutLock, Write};
+
+// ANSI term codes.
+const RESET: &'static str = "\x1b[0m";
+const BOLD: &'static str = "\x1b[1m";
+const RED: &'static str = "\x1b[31m";
+const GREEN: &'static str = "\x1b[32m";
+const YELLOW: &'static str = "\x1b[33m";
 
 /// Start logging.
 pub(crate) fn start(level: LevelFilter) {
@@ -43,7 +49,7 @@ fn format_kv_pairs<'b>(mut out: &mut StdoutLock<'b>, record: &Record) {
             key: kv::Key<'kvs>,
             val: kv::Value<'kvs>,
         ) -> Result<(), kv::Error> {
-            write!(self.stdout, "\n    {} {}", style(key).bold(), val).unwrap();
+            write!(self.stdout, "\n    {}{}{} {}", BOLD, key, RESET, val).unwrap();
             Ok(())
         }
     }
@@ -56,9 +62,9 @@ fn format_src(out: &mut StdoutLock<'_>, record: &Record<'_>) {
     let msg = record.target();
     match record.level() {
         Level::Trace | Level::Debug | Level::Info => {
-            write!(out, "{}", style(msg).green().bold()).unwrap()
+            write!(out, "{}{}{}{}", GREEN, BOLD, msg, RESET).unwrap();
         }
-        Level::Warn => write!(out, "{}", style(msg).yellow().bold()).unwrap(),
-        Level::Error => write!(out, "{}", style(msg).red().bold()).unwrap(),
+        Level::Warn => write!(out, "{}{}{}{}", YELLOW, BOLD, msg, RESET).unwrap(),
+        Level::Error => write!(out, "{}{}{}{}", RED, BOLD, msg, RESET).unwrap(),
     }
 }

@@ -11,14 +11,10 @@ readme = "README.md"
 edition = "2018"
 
 [dependencies]
-log = { version = "0.4.7", features = ["kv_unstable"] }
-async-log = "1.1.0"
+log = { version = "0.4.7", features = ["kv_unstable", "std"] }
 serde = "1.0.97"
 serde_derive = "1.0.97"
 cfg-if = "0.1.9"
-
-[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-console = "0.7.7"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 web-sys = { version = "0.3.25", features = ["console"] }
