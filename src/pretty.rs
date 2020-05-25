@@ -1,9 +1,14 @@
 //! Pretty print logs.
 
-use console::style;
 use log::{kv, Level, LevelFilter, Log, Metadata, Record};
-use std::fmt::Write;
-use std::io;
+use std::io::{self, StdoutLock, Write};
+
+// ANSI term codes.
+const RESET: &'static str = "\x1b[0m";
+const BOLD: &'static str = "\x1b[1m";
+const RED: &'static str = "\x1b[31m";
+const GREEN: &'static str = "\x1b[32m";
+const YELLOW: &'static str = "\x1b[33m";
 
 /// Start logging.
 pub(crate) fn start(level: LevelFilter) {
@@ -21,45 +26,45 @@ impl Log for Logger {
     }
 
     fn log(&self, record: &Record<'_>) {
-        use io::Write;
         if self.enabled(record.metadata()) {
-            let mut out = String::new();
-            format_src(&mut out, &record);
-            write!(out, " {}", &record.args()).unwrap();
-            format_kv_pairs(&mut out, &record);
-            writeln!(io::stdout(), "{}", out).unwrap();
+            let stdout = io::stdout();
+            let mut handle = stdout.lock();
+            format_src(&mut handle, &record);
+            write!(handle, " {}", &record.args()).unwrap();
+            format_kv_pairs(&mut handle, &record);
+            writeln!(&mut handle, "").unwrap();
         }
     }
     fn flush(&self) {}
 }
 
-fn format_kv_pairs(mut out: &mut String, record: &Record) {
-    struct Visitor<'a> {
-        string: &'a mut String,
+fn format_kv_pairs<'b>(mut out: &mut StdoutLock<'b>, record: &Record) {
+    struct Visitor<'a, 'b> {
+        stdout: &'a mut StdoutLock<'b>,
     }
 
-    impl<'kvs, 'a> kv::Visitor<'kvs> for Visitor<'a> {
+    impl<'kvs, 'a, 'b> kv::Visitor<'kvs> for Visitor<'a, 'b> {
         fn visit_pair(
             &mut self,
             key: kv::Key<'kvs>,
             val: kv::Value<'kvs>,
         ) -> Result<(), kv::Error> {
-            write!(self.string, "\n    {} {}", style(key).bold(), val).unwrap();
+            write!(self.stdout, "\n    {}{}{} {}", BOLD, key, RESET, val).unwrap();
             Ok(())
         }
     }
 
-    let mut visitor = Visitor { string: &mut out };
+    let mut visitor = Visitor { stdout: &mut out };
     record.key_values().visit(&mut visitor).unwrap();
 }
 
-fn format_src(out: &mut String, record: &Record<'_>) {
+fn format_src(out: &mut StdoutLock<'_>, record: &Record<'_>) {
     let msg = record.target();
     match record.level() {
         Level::Trace | Level::Debug | Level::Info => {
-            write!(out, "{}", style(msg).green().bold()).unwrap()
+            write!(out, "{}{}{}{}", GREEN, BOLD, msg, RESET).unwrap();
         }
-        Level::Warn => write!(out, "{}", style(msg).yellow().bold()).unwrap(),
-        Level::Error => write!(out, "{}", style(msg).red().bold()).unwrap(),
+        Level::Warn => write!(out, "{}{}{}{}", YELLOW, BOLD, msg, RESET).unwrap(),
+        Level::Error => write!(out, "{}{}{}{}", RED, BOLD, msg, RESET).unwrap(),
     }
 }

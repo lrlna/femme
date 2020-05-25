@@ -1,8 +1,7 @@
 //! Print logs as ndjson.
 
 use log::{kv, LevelFilter, Log, Metadata, Record};
-use std::fmt::Write;
-use std::io;
+use std::io::{self, StdoutLock, Write};
 use std::time;
 
 /// Start logging.
@@ -22,13 +21,15 @@ impl Log for Logger {
 
     fn log(&self, record: &Record<'_>) {
         if self.enabled(record.metadata()) {
-            let mut out = String::from("{");
-            write!(&mut out, "\"level\":{}", get_level(record.level())).unwrap();
-            write!(&mut out, ",\"time\":{}", time::UNIX_EPOCH.elapsed().unwrap().as_millis()).unwrap();
-            write!(&mut out, ",\"msg\":\"{}\"", record.args()).unwrap();
-            format_kv_pairs(&mut out, &record);
-            writeln!(&mut out, "{}", "}").unwrap();
-            io::Write::write(&mut io::stdout(), out.as_bytes()).unwrap();
+            let stdout = io::stdout();
+            let mut handle = stdout.lock();
+            write!(&mut handle, "{}", '{').unwrap();
+            write!(&mut handle, "\"level\":{}", get_level(record.level())).unwrap();
+            let now = time::UNIX_EPOCH.elapsed().unwrap().as_millis();
+            write!(&mut handle, ",\"time\":{}", now).unwrap();
+            write!(&mut handle, ",\"msg\":\"{}\"", record.args()).unwrap();
+            format_kv_pairs(&mut handle, &record);
+            writeln!(&mut handle, "{}", "}").unwrap();
         }
     }
     fn flush(&self) {}
@@ -45,12 +46,12 @@ fn get_level(level: log::Level) -> u8 {
     }
 }
 
-fn format_kv_pairs(mut out: &mut String, record: &Record) {
-    struct Visitor<'a> {
-        string: &'a mut String,
+fn format_kv_pairs<'b>(mut out: &mut StdoutLock<'b>, record: &Record) {
+    struct Visitor<'a, 'b> {
+        string: &'a mut StdoutLock<'b>,
     }
 
-    impl<'kvs, 'a> kv::Visitor<'kvs> for Visitor<'a> {
+    impl<'kvs, 'a, 'b> kv::Visitor<'kvs> for Visitor<'a, 'b> {
         fn visit_pair(
             &mut self,
             key: kv::Key<'kvs>,
