@@ -1,6 +1,6 @@
 [package]
 name = "femme"
-version = "2.0.1"
+version = "2.1.0"
 license = "MIT OR Apache-2.0"
 authors = ["lrlna <shestak.irina@gmail.com>", "yoshuawuyts <yoshuawuyts@gmail.com"]
 repository = "https://github.com/lrlna/femme"
