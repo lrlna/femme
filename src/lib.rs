@@ -45,7 +45,7 @@ pub fn start() {
 ///
 /// # Examples
 /// ```
-/// femme::start(log::LevelFilter::Trace);
+/// femme::with_level(log::LevelFilter::Trace);
 /// ```
 pub fn with_level(level: log::LevelFilter) {
     #[cfg(target_arch = "wasm32")]
