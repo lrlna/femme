@@ -7,7 +7,7 @@ use wasm_bindgen::prelude::*;
 use std::collections::HashMap;
 
 /// Start logging.
-pub(crate) fn start<F>(level: LevelFilter) {
+pub(crate) fn start(level: LevelFilter) {
     let logger = Box::new(Logger {});
     log::set_boxed_logger(logger).expect("Could not start logging");
     log::set_max_level(level);
