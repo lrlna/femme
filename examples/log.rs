@@ -8,4 +8,6 @@ fn main() {
     log::info!("Request handled", { method: "GET", path: "/foo/bar", status: 200, elapsed: "4ms" });
     log::debug!("Getting String as bson value type");
     log::trace!("Task spawned", {task_id: "567", thread_id: "12"});
+    log::info!(r#"raw " fun with JSON"#);
+    log::info!("n\ne\nw\nl\ni\nn\ne\n");
 }

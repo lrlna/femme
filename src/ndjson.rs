@@ -27,7 +27,8 @@ impl Log for Logger {
             write!(&mut handle, "\"level\":{}", get_level(record.level())).unwrap();
             let now = time::UNIX_EPOCH.elapsed().unwrap().as_millis();
             write!(&mut handle, ",\"time\":{}", now).unwrap();
-            write!(&mut handle, ",\"msg\":\"{}\"", record.args()).unwrap();
+            write!(&mut handle, r#","msg":"#).unwrap();
+            serde_json::to_writer(&mut handle, record.args()).unwrap();
             format_kv_pairs(&mut handle, &record);
             writeln!(&mut handle, "{}", "}").unwrap();
         }
