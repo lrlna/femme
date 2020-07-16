@@ -23,14 +23,12 @@ impl Log for Logger {
         if self.enabled(record.metadata()) {
             let stdout = io::stdout();
             let mut handle = stdout.lock();
-            write!(&mut handle, "{}", '{').unwrap();
-            write!(&mut handle, "\"level\":{}", get_level(record.level())).unwrap();
-            let now = time::UNIX_EPOCH.elapsed().unwrap().as_millis();
-            write!(&mut handle, ",\"time\":{}", now).unwrap();
-            write!(&mut handle, ",\"msg\":").unwrap();
+            let level = get_level(record.level());
+            let time = time::UNIX_EPOCH.elapsed().unwrap().as_millis();
+            write!(&mut handle, "{{\"level\":{},\"time\":{},\"msg\":", level, time).unwrap();
             serde_json::to_writer(&mut handle, record.args()).unwrap();
             format_kv_pairs(&mut handle, &record);
-            writeln!(&mut handle, "{}", "}").unwrap();
+            writeln!(&mut handle, "}}").unwrap();
         }
     }
     fn flush(&self) {}
