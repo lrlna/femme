@@ -1,14 +1,15 @@
 //! Print logs as ndjson.
 
-use log::{kv, LevelFilter, Log, Metadata, Record};
+use log::{kv, LevelFilter, Log, Metadata, Record, SetLoggerError};
 use std::io::{self, StdoutLock, Write};
 use std::time;
 
 /// Start logging.
-pub(crate) fn start(level: LevelFilter) {
+pub(crate) fn start(level: LevelFilter) -> Result<(), SetLoggerError> {
     let logger = Box::new(Logger {});
-    log::set_boxed_logger(logger).expect("Could not start logging");
+    log::set_boxed_logger(logger)?;
     log::set_max_level(level);
+    Ok(())
 }
 
 #[derive(Debug)]
