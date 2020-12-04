@@ -56,7 +56,7 @@ fn format_kv_pairs<'b>(mut out: &mut StdoutLock<'b>, record: &Record) {
             key: kv::Key<'kvs>,
             val: kv::Value<'kvs>,
         ) -> Result<(), kv::Error> {
-            write!(self.string, ",\"{}\":{}", key, val)?;
+            write!(self.string, ",\"{}\":\"{}\"", key, val)?;
             Ok(())
         }
     }
