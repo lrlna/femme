@@ -2,6 +2,7 @@
 
 use log::{kv, Level, LevelFilter, Log, Metadata, Record};
 use std::io::{self, StdoutLock, Write};
+use crate::filter::{Filter, Builder};
 
 // ANSI term codes.
 const RESET: &'static str = "\x1b[0m";
@@ -12,17 +13,30 @@ const YELLOW: &'static str = "\x1b[33m";
 
 /// Start logging.
 pub(crate) fn start(level: LevelFilter) {
-    let logger = Box::new(Logger {});
+    let filter = Builder::new()
+        .filter_level(level)
+        .build();
+    let logger = Box::new(Logger { filter });
     log::set_boxed_logger(logger).expect("Could not start logging");
     log::set_max_level(level);
 }
 
+/// Start logging with filter.
+pub(crate) fn with_filter(filter: Filter) {
+    let max_level = filter.filter();
+    let logger = Box::new(Logger { filter });
+    log::set_boxed_logger(logger).expect("Could not start logging");
+    log::set_max_level(max_level);
+}
+
 #[derive(Debug)]
-pub(crate) struct Logger {}
+pub(crate) struct Logger {
+    filter: Filter,
+}
 
 impl Log for Logger {
     fn enabled(&self, metadata: &Metadata<'_>) -> bool {
-        metadata.level() <= log::max_level()
+        self.filter.enabled(metadata)
     }
 
     fn log(&self, record: &Record<'_>) {
