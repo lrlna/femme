@@ -20,6 +20,10 @@ mod pretty;
 #[cfg(target_arch = "wasm32")]
 mod wasm;
 
+mod filter;
+
+pub use filter::{Filter, Builder};
+
 /// Starts logging depending on current environment.
 ///
 /// # Log output
@@ -58,6 +62,21 @@ pub fn with_level(level: log::LevelFilter) {
             pretty::start(level);
         } else {
             ndjson::start(level);
+        }
+    }
+}
+
+pub fn with_filter(filter: Filter) {
+    #[cfg(target_arch = "wasm32")]
+    wasm::start(level);
+
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        // Use ndjson in release mode, pretty logging while debugging.
+        if cfg!(debug_assertions) {
+            pretty::with_filter(filter);
+        } else {
+            ndjson::with_filter(filter);
         }
     }
 }
