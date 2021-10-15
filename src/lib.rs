@@ -9,6 +9,7 @@
 //! log::info!("Listening on port 8080");
 //! ```
 
+use env_logger::filter::{Builder, Filter};
 pub use log::LevelFilter;
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -36,7 +37,8 @@ mod wasm;
 /// log::info!("Listening on port 8080");
 /// ```
 pub fn start() {
-    with_level(LevelFilter::Info);
+    let filter = Builder::from_env("RUST_LOG").build();
+    with_filter(filter);
 }
 
 /// Start logging with a log level.
@@ -48,16 +50,28 @@ pub fn start() {
 /// femme::with_level(log::LevelFilter::Trace);
 /// ```
 pub fn with_level(level: log::LevelFilter) {
+    let filter = Builder::new().filter_level(level).build();
+    with_filter(filter)
+}
+
+/// Start logging with a log filter.
+///
+/// # Examples
+/// ```
+/// let filter = env_logger::filter::Builder::from_env("RUST_LOG").build();
+/// femme::with_filter(filter);
+/// ```
+pub fn with_filter(filter: Filter) {
     #[cfg(target_arch = "wasm32")]
-    wasm::start(level);
+    wasm::start(filter);
 
     #[cfg(not(target_arch = "wasm32"))]
     {
         // Use ndjson in release mode, pretty logging while debugging.
         if cfg!(debug_assertions) {
-            pretty::start(level);
+            pretty::start(filter);
         } else {
-            ndjson::start(level);
+            ndjson::start(filter);
         }
     }
 }
