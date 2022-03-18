@@ -22,6 +22,9 @@ mod wasm;
 
 /// Starts logging depending on current environment.
 ///
+/// Always logs with a LevelFilter of Info.
+/// For other filters use with_level.
+///
 /// # Log output
 ///
 /// - when compiling with `--release` uses ndjson.
