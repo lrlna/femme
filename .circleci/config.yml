@@ -11,16 +11,15 @@ orbs:
 # These are their specifications:
 executors:
   linux: &linux
-    docker:
-      - image: cimg/base:stable
-    resource_class: medium+
+    machine:
+      image: ubuntu-2004:202010-01
   macos: &macos
     macos:
-      xcode: "11.4"
+      xcode: "12.5.1"
   windows: &windows
     machine:
-      image: 'windows-server-2019-vs2019:stable'
-    resource_class: windows.xlarge
+      image: 'windows-default'
+    resource_class: windows.medium
     shell: powershell.exe -ExecutionPolicy Bypass
 
 # There are two workflows: lint and test.
