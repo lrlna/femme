@@ -91,7 +91,7 @@ dependencies = [
 
 [[package]]
 name = "femme"
-version = "2.1.2"
+version = "2.2.0"
 dependencies = [
  "cfg-if 1.0.0",
  "js-sys",
