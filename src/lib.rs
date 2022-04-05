@@ -22,7 +22,7 @@ mod wasm;
 
 /// Starts logging depending on current environment.
 ///
-/// Always logs with a LevelFilter of Info.
+/// Always logs with 'Info' LevelFilter.
 /// For other filters use with_level.
 ///
 /// # Log output
