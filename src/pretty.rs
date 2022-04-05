@@ -11,7 +11,7 @@ const GREEN: &str = "\x1b[32m";
 const YELLOW: &str = "\x1b[33m";
 
 /// Start logging.
-pub(crate) fn start(level: LevelFilter) {
+pub fn start(level: LevelFilter) {
     let logger = Box::new(Logger {});
     log::set_boxed_logger(logger).expect("Could not start logging");
     log::set_max_level(level);
