@@ -43,8 +43,8 @@ $ cargo add femme
 
 [1]: https://img.shields.io/crates/v/femme.svg?style=flat-square
 [2]: https://crates.io/crates/femme
-[3]: https://img.shields.io/travis/lrlna/femme/master.svg?style=flat-square
-[4]: https://travis-ci.org/lrlna/femme
+[3]: https://img.shields.io/circleci/build/github/lrlna/femme
+[4]: https://app.circleci.com/pipelines/github/lrlna/femme
 [5]: https://img.shields.io/crates/d/femme.svg?style=flat-square
 [6]: https://crates.io/crates/femme
 [7]: https://img.shields.io/badge/docs-latest-blue.svg?style=flat-square
