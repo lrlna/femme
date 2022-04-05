@@ -19,7 +19,7 @@ executors:
       xcode: "12.5.1"
   windows: &windows
     machine:
-      image: 'win/default'
+      image: 'windows-server-2019-vs2019:stable'
     resource_class: windows.medium
     shell: powershell.exe -ExecutionPolicy Bypass
 
