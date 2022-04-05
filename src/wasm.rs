@@ -1,5 +1,6 @@
 //! Print logs as ndjson.
 
+use env_logger::filter::Filter;
 use js_sys::Object;
 use log::{kv, Level, LevelFilter, Log, Metadata, Record};
 use wasm_bindgen::prelude::*;
@@ -7,10 +8,11 @@ use wasm_bindgen::prelude::*;
 use std::collections::HashMap;
 
 /// Start logging.
-pub(crate) fn start(level: LevelFilter) {
-    let logger = Box::new(Logger {});
+pub(crate) fn start(filter: Filter) {
+    let max_level = filter.filter();
+    let logger = Box::new(Logger { filter });
     log::set_boxed_logger(logger).expect("Could not start logging");
-    log::set_max_level(level);
+    log::set_max_level(max_level);
 }
 
 #[derive(Debug)]
@@ -18,11 +20,11 @@ pub(crate) struct Logger {}
 
 impl Log for Logger {
     fn enabled(&self, metadata: &Metadata<'_>) -> bool {
-        metadata.level() <= log::max_level()
+        self.filter.enabled(metadata)
     }
 
     fn log(&self, record: &Record<'_>) {
-        if self.enabled(record.metadata()) {
+        if self.filter.matches(record) {
             let args = format!("{}", record.args()).into();
             let line = format_line(&record).into();
 
