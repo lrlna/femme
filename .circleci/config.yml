@@ -6,6 +6,7 @@ version: 2.1
 orbs:
   rust: circleci/rust@1.6.0
   gh: circleci/github-cli@2.0.0
+  win: circleci/windows@2.2.0
 
 # We run jobs on the following platforms: linux, macos and windows.
 # These are their specifications:
