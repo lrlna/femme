@@ -25,9 +25,14 @@ impl Log for Logger {
             let mut handle = stdout.lock();
             let level = get_level(record.level());
             let time = time::UNIX_EPOCH.elapsed().unwrap().as_millis();
-            write!(&mut handle, "{{\"level\":{},\"time\":{},\"msg\":", level, time).unwrap();
+            write!(
+                &mut handle,
+                "{{\"level\":{},\"time\":{},\"msg\":",
+                level, time
+            )
+            .unwrap();
             serde_json::to_writer(&mut handle, record.args()).unwrap();
-            format_kv_pairs(&mut handle, &record);
+            format_kv_pairs(&mut handle, record);
             writeln!(&mut handle, "}}").unwrap();
         }
     }
@@ -45,7 +50,7 @@ fn get_level(level: log::Level) -> u8 {
     }
 }
 
-fn format_kv_pairs<'b>(mut out: &mut StdoutLock<'b>, record: &Record) {
+fn format_kv_pairs<'b>(out: &mut StdoutLock<'b>, record: &Record) {
     struct Visitor<'a, 'b> {
         string: &'a mut StdoutLock<'b>,
     }
@@ -61,6 +66,6 @@ fn format_kv_pairs<'b>(mut out: &mut StdoutLock<'b>, record: &Record) {
         }
     }
 
-    let mut visitor = Visitor { string: &mut out };
+    let mut visitor = Visitor { string: out };
     record.key_values().visit(&mut visitor).unwrap();
 }

@@ -4,11 +4,11 @@ use log::{kv, Level, LevelFilter, Log, Metadata, Record};
 use std::io::{self, StdoutLock, Write};
 
 // ANSI term codes.
-const RESET: &'static str = "\x1b[0m";
-const BOLD: &'static str = "\x1b[1m";
-const RED: &'static str = "\x1b[31m";
-const GREEN: &'static str = "\x1b[32m";
-const YELLOW: &'static str = "\x1b[33m";
+const RESET: &str = "\x1b[0m";
+const BOLD: &str = "\x1b[1m";
+const RED: &str = "\x1b[31m";
+const GREEN: &str = "\x1b[32m";
+const YELLOW: &str = "\x1b[33m";
 
 /// Start logging.
 pub(crate) fn start(level: LevelFilter) {
@@ -29,16 +29,16 @@ impl Log for Logger {
         if self.enabled(record.metadata()) {
             let stdout = io::stdout();
             let mut handle = stdout.lock();
-            format_src(&mut handle, &record);
+            format_src(&mut handle, record);
             write!(handle, " {}", &record.args()).unwrap();
-            format_kv_pairs(&mut handle, &record);
-            writeln!(&mut handle, "").unwrap();
+            format_kv_pairs(&mut handle, record);
+            writeln!(&mut handle).unwrap();
         }
     }
     fn flush(&self) {}
 }
 
-fn format_kv_pairs<'b>(mut out: &mut StdoutLock<'b>, record: &Record) {
+fn format_kv_pairs<'b>(out: &mut StdoutLock<'b>, record: &Record) {
     struct Visitor<'a, 'b> {
         stdout: &'a mut StdoutLock<'b>,
     }
@@ -54,7 +54,7 @@ fn format_kv_pairs<'b>(mut out: &mut StdoutLock<'b>, record: &Record) {
         }
     }
 
-    let mut visitor = Visitor { stdout: &mut out };
+    let mut visitor = Visitor { stdout: out };
     record.key_values().visit(&mut visitor).unwrap();
 }
 
