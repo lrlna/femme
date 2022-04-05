@@ -61,7 +61,12 @@ fn format_kv_pairs<'b>(out: &mut StdoutLock<'b>, record: &Record) {
             key: kv::Key<'kvs>,
             val: kv::Value<'kvs>,
         ) -> Result<(), kv::Error> {
-            write!(self.string, ",\"{}\":\"{}\"", key, val)?;
+            if let Ok(value_str) = serde_json::to_string(&val) {
+                write!(self.string, ",\"{}\":{}", key, value_str)?;
+            } else {
+                write!(self.string, ",\"{}\":\"{}\"", key, val)?;
+            }
+
             Ok(())
         }
     }
