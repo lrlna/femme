@@ -94,7 +94,10 @@ jobs:
           rust_channel: << parameters.rust_channel >>
           platform: << parameters.platform >>
       - run:
-          name: cargo build on wasm32-unknown-unknown
+          name: Download wasm target
+          command: rustup target add wasm32-unknown-unknown
+      - run:
+          name: Run cargo build on wasm32-unknown-unknown
           command: cargo build --target wasm32-unknown-unknown
 
   test:
