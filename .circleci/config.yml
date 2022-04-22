@@ -79,11 +79,11 @@ jobs:
           name: Run cargo clippy
           command: cargo clippy --all-targets --all-features -- -D warnings && cargo clippy --benches
 
-  lint:
+  wasm:
     parameters:
       rust_channel:
         type: enum
-        enum: ["stable", "nightly"]
+        enum: ["stable"]
         default: stable
       platform:
         type: executor
