@@ -66,7 +66,7 @@ fn format_kv_pairs(record: &Record) -> Option<Object> {
             if self.hashmap.is_none() {
                 self.hashmap = Some(HashMap::new())
             }
-            let hm = self.hashmap.as_mut().ok_or(kv::Error::msg("No hashmap found"))?;
+            let hm = self.hashmap.as_mut().unwrap();
             hm.insert(key.to_string(), val.to_string());
             Ok(())
         }
