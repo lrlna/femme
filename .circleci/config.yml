@@ -40,6 +40,14 @@ workflows:
             parameters:
               platform: [linux]
               rust_channel: [stable]
+  wasm:
+    jobs:
+      - wasm:
+          name: Wasm compilation
+          matrix:
+            parameters:
+              platform: [linux]
+              rust_channel: [stable]
   test:
     jobs:
       - test:
@@ -70,6 +78,27 @@ jobs:
       - run:
           name: Run cargo clippy
           command: cargo clippy --all-targets --all-features -- -D warnings && cargo clippy --benches
+
+  wasm:
+    parameters:
+      rust_channel:
+        type: enum
+        enum: ["stable"]
+        default: stable
+      platform:
+        type: executor
+    executor: << parameters.platform >>
+    steps:
+      - checkout
+      - install_system_deps:
+          rust_channel: << parameters.rust_channel >>
+          platform: << parameters.platform >>
+      - run:
+          name: Download wasm target
+          command: rustup target add wasm32-unknown-unknown
+      - run:
+          name: Run cargo build on wasm32-unknown-unknown
+          command: cargo build --target wasm32-unknown-unknown
 
   test:
     parameters:
