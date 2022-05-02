@@ -54,6 +54,13 @@ pub fn with_level(level: log::LevelFilter) {
     Femme::builder().level(level).into_femme().start()
 }
 
+/// ```
+/// femme::Femme::builder()
+///    .ndjson()
+///    .level(log::LevelFilter::Trace)
+///    .into_femme()
+///    .start();
+/// ```
 #[derive(Debug)]
 pub struct Femme {
     level: LevelFilter,
